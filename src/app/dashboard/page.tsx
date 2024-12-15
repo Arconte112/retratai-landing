@@ -1,21 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
 import { CpuChipIcon, CreditCardIcon, ClockIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<any>(null);
+  const { user, loading } = useAuth();
 
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-    };
-
-    getUser();
-  }, []);
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -55,68 +53,6 @@ export default function DashboardPage() {
                 className="font-medium text-sky-600 hover:text-sky-500"
               >
                 Entrenar nuevo modelo
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Tarjeta de Créditos Disponibles */}
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <CreditCardIcon className="h-6 w-6 text-gray-400" />
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Créditos Disponibles
-                  </dt>
-                  <dd className="flex items-baseline">
-                    <div className="text-2xl font-semibold text-gray-900">100</div>
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-          <div className="bg-gray-50 px-5 py-3">
-            <div className="text-sm">
-              <Link
-                href="/dashboard/credits"
-                className="font-medium text-sky-600 hover:text-sky-500"
-              >
-                Comprar créditos
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Tarjeta de Último Modelo */}
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <ClockIcon className="h-6 w-6 text-gray-400" />
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Último Modelo Entrenado
-                  </dt>
-                  <dd className="flex items-baseline">
-                    <div className="text-sm text-gray-900">No hay modelos entrenados</div>
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-          <div className="bg-gray-50 px-5 py-3">
-            <div className="text-sm">
-              <Link
-                href="/dashboard/models"
-                className="font-medium text-sky-600 hover:text-sky-500"
-              >
-                Ver todos los modelos
               </Link>
             </div>
           </div>
