@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import Replicate from "replicate";
+import { withRetries, handleReplicateError } from './api-utils';
 
 if (!process.env.REPLICATE_API_TOKEN) {
   throw new Error('REPLICATE_API_TOKEN is not defined in environment variables');
@@ -50,32 +51,38 @@ export async function createModel({
   modelName, 
   visibility = 'private' 
 }: CreateModelParams): Promise<ModelResponse> {
-  try {
-    const response = await fetch(`${REPLICATE_API_URL}/models`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Token ${REPLICATE_API_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        owner: REPLICATE_USERNAME,
-        name: modelName,
-        visibility: visibility,
-        hardware: 'gpu-t4'
-      }),
-    });
+  return withRetries(
+    async () => {
+      const response = await fetch(`${REPLICATE_API_URL}/models`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Token ${REPLICATE_API_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          owner: REPLICATE_USERNAME,
+          name: modelName,
+          visibility: visibility,
+          hardware: 'gpu-t4'
+        }),
+      });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(`Failed to create model: ${JSON.stringify(error)}`);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(`Failed to create model: ${JSON.stringify(error)}`);
+      }
+
+      const data = await response.json();
+      return ModelResponseSchema.parse(data);
+    },
+    {
+      maxRetries: 3,
+      initialDelay: 2000,
+    },
+    {
+      customErrorMessage: 'Error al crear el modelo. Por favor, intenta de nuevo.',
     }
-
-    const data = await response.json();
-    return ModelResponseSchema.parse(data);
-  } catch (error) {
-    console.error('Error creating model:', error);
-    throw error;
-  }
+  ).catch(handleReplicateError);
 }
 
 export async function startTraining({
@@ -83,35 +90,41 @@ export async function startTraining({
   triggerWord,
   zipUrl,
 }: StartTrainingParams) {
-  try {
-    const training = await replicate.trainings.create(
-      "ostris",
-      "flux-dev-lora-trainer",
-      "e440909d3512c31646ee2e0c7d6f6f4923224863a6a10c494606e79fb5844497",
-      {
-        destination: `${REPLICATE_USERNAME}/${modelName}`,
-        input: {
-          steps: 1000,
-          lora_rank: 16,
-          optimizer: "adamw8bit",
-          batch_size: 1,
-          resolution: "512,768,1024",
-          autocaption: false,
-          input_images: zipUrl,
-          trigger_word: triggerWord,
-          learning_rate: 0.0004,
-          wandb_project: "flux_train_replicate",
-          wandb_save_interval: 100,
-          caption_dropout_rate: 0.05,
-          cache_latents_to_disk: false,
-          wandb_sample_interval: 100
+  return withRetries(
+    async () => {
+      const training = await replicate.trainings.create(
+        "ostris",
+        "flux-dev-lora-trainer",
+        "e440909d3512c31646ee2e0c7d6f6f4923224863a6a10c494606e79fb5844497",
+        {
+          destination: `${REPLICATE_USERNAME}/${modelName}`,
+          input: {
+            steps: 1000,
+            lora_rank: 16,
+            optimizer: "adamw8bit",
+            batch_size: 1,
+            resolution: "512,768,1024",
+            autocaption: false,
+            input_images: zipUrl,
+            trigger_word: triggerWord,
+            learning_rate: 0.0004,
+            wandb_project: "flux_train_replicate",
+            wandb_save_interval: 100,
+            caption_dropout_rate: 0.05,
+            cache_latents_to_disk: false,
+            wandb_sample_interval: 100
+          }
         }
-      }
-    );
+      );
 
-    return training;
-  } catch (error) {
-    console.error('Error starting training:', error);
-    throw error;
-  }
+      return training;
+    },
+    {
+      maxRetries: 2,
+      initialDelay: 3000,
+    },
+    {
+      customErrorMessage: 'Error al iniciar el entrenamiento. Por favor, intenta de nuevo.',
+    }
+  ).catch(handleReplicateError);
 } 
