@@ -7,6 +7,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export const uploadZipToStorage = async (zipFile: Blob, fileName: string) => {
   try {
+    console.log(`📤 Starting upload to Supabase storage: ${fileName}`);
+    console.log(`📊 ZIP file size: ${(zipFile.size / 1024 / 1024).toFixed(2)}MB`);
+    
     const { data, error } = await supabase.storage
       .from('zip')
       .upload(fileName, zipFile, {
@@ -14,7 +17,11 @@ export const uploadZipToStorage = async (zipFile: Blob, fileName: string) => {
         upsert: false
       });
 
-    if (error) throw error;
+    if (error) {
+      console.error('❌ Supabase upload error:', error);
+      throw error;
+    }
+    console.log('✅ Supabase upload successful:', data);
     return data;
   } catch (error) {
     console.error('Error uploading zip:', error);

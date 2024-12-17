@@ -1,12 +1,8 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
-import JSZip from 'jszip';
-import { v4 as uuidv4 } from 'uuid';
-import { uploadZipToStorage } from '@/lib/supabase';
-import { toast } from 'sonner';
 
 interface StyleSelectorProps {
-  onStyleSelect: (style: string) => void;
+  onStyleSelect: (style: string, images: File[], modelName: string) => void;
   modelName: string;
   images: File[];
 }
@@ -14,54 +10,16 @@ interface StyleSelectorProps {
 export default function StyleSelector({ onStyleSelect, modelName, images }: StyleSelectorProps) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleStyleClick = (style: string) => {
     setSelectedStyle(style);
     setShowConfirmDialog(true);
   };
 
-  const createAndUploadZip = async () => {
-    try {
-      setIsProcessing(true);
-      const zip = new JSZip();
-
-      // Agregar cada imagen al ZIP
-      for (let i = 0; i < images.length; i++) {
-        const image = images[i];
-        const extension = image.name.split('.').pop();
-        // Renombrar las imágenes con números secuenciales
-        zip.file(`image_${i + 1}.${extension}`, image);
-      }
-
-      // Generar el archivo ZIP
-      const zipContent = await zip.generateAsync({ type: 'blob' });
-
-      // Crear un nombre único para el ZIP
-      const uniqueId = uuidv4();
-      const fileName = `${modelName.toLowerCase().replace(/\s+/g, '_')}_${uniqueId}.zip`;
-
-      // Subir el ZIP a Supabase
-      await uploadZipToStorage(zipContent, fileName);
-
-      return fileName;
-    } catch (error) {
-      console.error('Error creating/uploading zip:', error);
-      throw error;
-    }
-  };
-
   const handleConfirm = async () => {
     if (!selectedStyle) return;
-
-    try {
-      const fileName = await createAndUploadZip();
-      setShowConfirmDialog(false);
-      onStyleSelect(selectedStyle);
-    } catch (error) {
-      toast.error('Error al procesar las imágenes. Por favor, intenta de nuevo.');
-      setIsProcessing(false);
-    }
+    setShowConfirmDialog(false);
+    onStyleSelect(selectedStyle, images, modelName);
   };
 
   return (
@@ -149,27 +107,15 @@ export default function StyleSelector({ onStyleSelect, modelName, images }: Styl
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <button
                   onClick={() => setShowConfirmDialog(false)}
-                  disabled={isProcessing}
-                  className="inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-transparent rounded-md hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-500 disabled:opacity-50"
+                  className="inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-transparent rounded-md hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-500"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleConfirm}
-                  disabled={isProcessing}
-                  className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 disabled:opacity-50"
+                  className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
                 >
-                  {isProcessing ? (
-                    <>
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                      Procesando...
-                    </>
-                  ) : (
-                    'Confirmar y comenzar'
-                  )}
+                  Confirmar y comenzar
                 </button>
               </div>
             </div>

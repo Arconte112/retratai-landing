@@ -81,14 +81,11 @@ export default function RegisterPage() {
   }
 
   return (
-    <AuthCard>
+    <AuthCard
+      title="Crea tu cuenta"
+      subtitle="Regístrate para comenzar"
+    >
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-          Crea tu cuenta
-        </h2>
-      </div>
-
-      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
         {error && (
           <div className="mb-4 p-4 rounded-md bg-red-50 text-red-700 text-sm">
             {error}

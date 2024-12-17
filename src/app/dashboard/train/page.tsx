@@ -18,6 +18,8 @@ export default function TrainPage() {
   const [images, setImages] = useState<ImagePreview[]>([]);
   const [showStyleSelector, setShowStyleSelector] = useState(false);
   const [isTraining, setIsTraining] = useState(false);
+  const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -88,7 +90,9 @@ export default function TrainPage() {
     setShowStyleSelector(true);
   };
 
-  const handleStyleSelect = async (style: string) => {
+  const handleStyleSelect = async (style: string, images: File[], modelName: string) => {
+    setSelectedStyle(style);
+    setSelectedImages(images);
     // Mostrar una animación de transición suave
     document.body.style.opacity = '0';
     setTimeout(() => {
@@ -116,11 +120,16 @@ export default function TrainPage() {
     };
   }, [images]);
 
-  if (isTraining) {
+  if (isTraining && selectedStyle) {
     return (
       <div className="min-h-screen bg-gray-50 py-8 animate-fade-in">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <TrainingProgress />
+          <TrainingProgress
+            style={selectedStyle}
+            images={selectedImages}
+            modelName={modelName}
+            gender={gender}
+          />
         </div>
       </div>
     );
