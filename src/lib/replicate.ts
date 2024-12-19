@@ -20,6 +20,7 @@ const replicate = new Replicate({
 
 // Schema para validar la respuesta de creación del modelo
 const ModelResponseSchema = z.object({
+  id: z.string(),
   url: z.string(),
   owner: z.string(),
   name: z.string(),
@@ -45,6 +46,8 @@ interface StartTrainingParams {
   modelName: string;
   triggerWord: string;
   zipUrl: string;
+  webhook?: string;
+  webhook_events_filter?: string[];
 }
 
 export async function createModel({ 
@@ -89,6 +92,8 @@ export async function startTraining({
   modelName,
   triggerWord,
   zipUrl,
+  webhook,
+  webhook_events_filter,
 }: StartTrainingParams) {
   return withRetries(
     async () => {
@@ -99,7 +104,7 @@ export async function startTraining({
         {
           destination: `${REPLICATE_USERNAME}/${modelName}`,
           input: {
-            steps: 1000,
+            steps: 30,
             lora_rank: 16,
             optimizer: "adamw8bit",
             batch_size: 1,
