@@ -1,6 +1,6 @@
 # RetratAI
 
-RetratAI es una landing page enfocada en vender un servicio de retratos generados con inteligencia artificial. El objetivo del proyecto es entregar una experiencia de marketing moderna, con diseño responsivo, CTA claros y secciones que muestran beneficios, ejemplos y planes de precios.
+RetratAI es una landing page/PoC orientada a comercializar retratos generados con IA. La aplicación simula el funnel completo: atrae con un hero persuasivo, muestra beneficios, evidencia resultados, describe planes y dispara conversiones. Detrás del UI se encuentran integraciones reales: Stripe para pagos y Replicate como backend de generación de imágenes, dejando listo el andamiaje para convertirlo en un producto monetizable.
 
 https://github.com/user-attachments/assets/30543bcf-5115-4e3f-a293-55ac673bee35
 
@@ -16,6 +16,8 @@ https://github.com/user-attachments/assets/30543bcf-5115-4e3f-a293-55ac673bee35
 - [Next.js 15 (App Router)](https://nextjs.org/)
 - [React 19](https://react.dev/)
 - [Tailwind CSS 3](https://tailwindcss.com/)
+- [Stripe](https://stripe.com/) (intento de pago y suscripciones)
+- [Replicate](https://replicate.com/) (API para generar los retratos)
 
 ## 🚀 Puesta en marcha
 ```bash
