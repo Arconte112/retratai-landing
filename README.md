@@ -1,6 +1,6 @@
 # RetratAI
 
-RetratAI es una landing page/PoC orientada a comercializar retratos generados con IA. La aplicación simula el funnel completo: atrae con un hero persuasivo, muestra beneficios, evidencia resultados, describe planes y dispara conversiones. Detrás del UI se encuentran integraciones reales: Stripe para pagos y Replicate como backend de generación de imágenes, dejando listo el andamiaje para convertirlo en un producto monetizable.
+RetratAI es un SaaS orientado a comercializar retratos generados con IA. La aplicación entrega el funnel completo: onboarding visual, elección de plan, pago con Stripe y consumo de Replicate para producir los retratos. Es un ejemplo de producto listo para monetizar, con énfasis en UX, integración de proveedores y escalabilidad front-to-back.
 
 https://github.com/user-attachments/assets/30543bcf-5115-4e3f-a293-55ac673bee35
 
